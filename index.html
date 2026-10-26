@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Democracia em Dados</title>
+    <style>
+      :root {
+        --bg: #0b1b2b;
+        --bg2: #10283f;
+        --ink: #f4f7fb;
+        --muted: #9db3c8;
+        --verde: #19b36b;
+        --amarelo: #ffd23f;
+        --azul: #3a86ff;
+        --rosa: #ff5d8f;
+        --card: #142f4a;
+        --line: #244767;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        overflow: hidden;
+      }
+      .deck {
+        position: fixed;
+        inset: 0;
+      }
+      .slide {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        padding: 6vh 7vw;
+        background:
+          radial-gradient(
+            1200px 700px at 85% -10%,
+            #173a5c 0%,
+            transparent 60%
+          ),
+          linear-gradient(160deg, var(--bg) 0%, var(--bg2) 100%);
+      }
+      .slide.active {
+        display: flex;
+        animation: in 0.45s ease;
+      }
+      @keyframes in {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .tag {
+        font-size: clamp(11px, 1.4vw, 18px);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--amarelo);
+        font-weight: 700;
+        margin-bottom: 2vh;
+      }
+      h1 {
+        font-size: clamp(34px, 6.4vw, 92px);
+        line-height: 1.02;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+      h2 {
+        font-size: clamp(26px, 4.2vw, 58px);
+        line-height: 1.1;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        margin-bottom: 3vh;
+      }
+      h3 {
+        font-size: clamp(16px, 2vw, 28px);
+        margin-bottom: 1vh;
+      }
+      p,
+      li {
+        font-size: clamp(15px, 2vw, 28px);
+        line-height: 1.45;
+        color: #dbe6f2;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .hl-g {
+        color: var(--verde);
+      }
+      .hl-y {
+        color: var(--amarelo);
+      }
+      .hl-b {
+        color: var(--azul);
+      }
+      .hl-r {
+        color: var(--rosa);
+      }
+      .bar {
+        height: 0.7vh;
+        width: 14vw;
+        border-radius: 9px;
+        margin: 3vh 0;
+        background: linear-gradient(
+          90deg,
+          var(--verde),
+          var(--amarelo),
+          var(--azul)
+        );
+      }
+      ul {
+        list-style: none;
+        display: grid;
+        gap: 1.6vh;
+      }
+      ul li::before {
+        content: '▸ ';
+        color: var(--amarelo);
+        font-weight: 700;
+      }
+      .grid {
+        display: grid;
+        gap: 2vw;
+      }
+      .g2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .g3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .g4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 2.4vh 1.8vw;
+      }
+      .card p,
+      .card li {
+        font-size: clamp(13px, 1.55vw, 22px);
+      }
+      .big {
+        font-size: clamp(28px, 4vw, 56px);
+        font-weight: 800;
+        line-height: 1;
+      }
+      .ods {
+        display: inline-block;
+        background: #00689d;
+        color: #fff;
+        font-weight: 800;
+        border-radius: 10px;
+        padding: 0.4vh 1vw;
+        font-size: clamp(13px, 1.6vw, 22px);
+        margin-bottom: 1vh;
+      }
+      /* timeline */
+      .tl {
+        display: grid;
+        gap: 0;
+        border-left: 3px solid var(--line);
+        margin-left: 1vw;
+      }
+      .tl div {
+        position: relative;
+        padding: 0 0 2.2vh 2vw;
+      }
+      .tl div::before {
+        content: '';
+        position: absolute;
+        left: -0.9vw;
+        top: 0.6vh;
+        width: 1.2vw;
+        height: 1.2vw;
+        min-width: 10px;
+        min-height: 10px;
+        border-radius: 50%;
+        background: var(--amarelo);
+        box-shadow: 0 0 0 4px var(--bg);
+      }
+      .tl b {
+        color: var(--amarelo);
+        font-size: clamp(15px, 2vw, 28px);
+      }
+      .tl span {
+        font-size: clamp(13px, 1.8vw, 25px);
+        color: #dbe6f2;
+      }
+      /* pipeline */
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 1vw;
+        flex-wrap: nowrap;
+      }
+      .step {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 2.4vh 1vw;
+        text-align: center;
+      }
+      .step .ic {
+        font-size: clamp(26px, 4vw, 56px);
+        margin-bottom: 1vh;
+      }
+      .step p {
+        font-size: clamp(12px, 1.4vw, 20px);
+      }
+      .arrow {
+        align-self: center;
+        font-size: clamp(20px, 3vw, 40px);
+        color: var(--amarelo);
+      }
+      /* receipt */
+      .receipt {
+        font-family: 'Courier New', ui-monospace, monospace;
+        background: #fbfaf4;
+        color: #111;
+        border-radius: 6px;
+        padding: 2.4vh 1.8vw;
+        font-size: clamp(12px, 1.55vw, 22px);
+        line-height: 1.5;
+        white-space: pre;
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+        transform: rotate(1.2deg);
+        -webkit-mask: conic-gradient(
+            from -45deg at bottom,
+            #0000,
+            #000 1deg 89deg,
+            #0000 90deg
+          )
+          50%/1.4vw 100%;
+        mask: conic-gradient(
+            from -45deg at bottom,
+            #0000,
+            #000 1deg 89deg,
+            #0000 90deg
+          )
+          50%/1.4vw 100%;
+        padding-bottom: 4vh;
+      }
+      .split {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 4vw;
+        align-items: center;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      td,
+      th {
+        padding: 1.2vh 1vw;
+        text-align: left;
+        font-size: clamp(13px, 1.8vw, 26px);
+        border-bottom: 1px solid var(--line);
+      }
+      th {
+        color: var(--amarelo);
+        font-size: clamp(11px, 1.3vw, 18px);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      td:last-child {
+        color: var(--verde);
+        font-weight: 800;
+        text-align: right;
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid var(--line);
+        border-radius: 99px;
+        padding: 0.5vh 1vw;
+        font-size: clamp(11px, 1.3vw, 18px);
+        color: var(--muted);
+        margin: 0.4vh 0.3vw 0 0;
+      }
+      /* hud */
+      .progress {
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 0.6vh;
+        background: linear-gradient(
+          90deg,
+          var(--verde),
+          var(--amarelo),
+          var(--azul)
+        );
+        width: 0;
+        transition: width 0.3s;
+        z-index: 9;
+      }
+      .hud {
+        position: fixed;
+        right: 2vw;
+        bottom: 2vh;
+        color: var(--muted);
+        font-size: clamp(11px, 1.2vw, 16px);
+        z-index: 9;
+        display: flex;
+        gap: 1.2vw;
+        align-items: center;
+      }
+      .hud button {
+        background: var(--card);
+        border: 1px solid var(--line);
+        color: var(--ink);
+        border-radius: 8px;
+        padding: 0.6vh 1vw;
+        cursor: pointer;
+        font-size: inherit;
+      }
+      .hud button:hover {
+        border-color: var(--amarelo);
+      }
+      .foot {
+        position: fixed;
+        left: 2vw;
+        bottom: 2vh;
+        color: var(--muted);
+        font-size: clamp(10px, 1.1vw, 15px);
+        z-index: 9;
+      }
+      @media (max-width: 800px) {
+        .g3,
+        .g4,
+        .g2,
+        .split {
+          grid-template-columns: 1fr;
+        }
+        .flow {
+          flex-direction: column;
+        }
+        .arrow {
+          transform: rotate(90deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress" id="prog"></div>
+    <div class="deck" id="deck">
+      <!-- 1 -->
+      <section class="slide active">
+        <div class="tag">Dados · Democracia · ODS 16</div>
+        <h1>
+          Do <span class="hl-g">voto</span> ao
+          <span class="hl-y">dado</span>,<br />do dado ao
+          <span class="hl-b">papel</span>.
+        </h1>
+        <div class="bar"></div>
+        <p class="muted">
+          Como transformar dados abertos do TSE em decisões, dashboards e... um
+          cupom impresso na sua mão.
+        </p>
+      </section>
+
+      <!-- 2 -->
+      <section class="slide">
+        <div class="tag">25 de outubro - dia da democracia</div>
+        <h2>
+          Votar é o começo.<br /><span class="hl-y">Entender o resultado</span>
+          é o que fortalece a democracia.
+        </h2>
+        <div class="grid g3">
+          <div class="card">
+            <div class="big hl-g">1</div>
+            <h3>O voto</h3>
+            <p>
+              Cada pessoa, um voto. Milhões de escolhas registradas em urnas por
+              todo o país.
+            </p>
+          </div>
+          <div class="card">
+            <div class="big hl-y">2</div>
+            <h3>O dado</h3>
+            <p>
+              O resultado vira informação pública: por seção, município, estado,
+              região.
+            </p>
+          </div>
+          <div class="card">
+            <div class="big hl-b">3</div>
+            <h3>A leitura</h3>
+            <p>
+              Quem sabe analisar dados consegue fiscalizar, comparar, questionar
+              e explicar.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="slide">
+        <div class="tag">Nossa linha do tempo</div>
+        <h2>O período democrático <span class="hl-g">em marcos</span></h2>
+        <div class="tl">
+          <div>
+            <b>1984</b> ·
+            <span>Diretas Já: milhões nas ruas pedindo eleições diretas</span>
+          </div>
+          <div>
+            <b>1985</b> ·
+            <span>Fim do regime militar e retorno de um presidente civil</span>
+          </div>
+          <div>
+            <b>1988</b> ·
+            <span>Constituição Cidadã: direitos, voto e liberdades</span>
+          </div>
+          <div>
+            <b>1989</b> ·
+            <span
+              >Primeira eleição direta para presidente em quase 30 anos</span
+            >
+          </div>
+          <div>
+            <b>1996–2000</b> · <span>Urna eletrônica chega a todo o país</span>
+          </div>
+          <div>
+            <b>Hoje</b> ·
+            <span
+              >Dados abertos permitem que qualquer pessoa analise os
+              resultados</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- 4 -->
+      <section class="slide">
+        <span class="ods">ODS 16</span>
+        <h2>Paz, Justiça e <span class="hl-y">Instituições Eficazes</span></h2>
+        <p class="muted" style="margin-bottom: 3vh">
+          Objetivo de Desenvolvimento Sustentável da ONU. Três metas que
+          conversam direto com o nosso projeto:
+        </p>
+        <div class="grid g3">
+          <div class="card">
+            <div class="big hl-g">16.6</div>
+            <h3>Instituições transparentes</h3>
+            <p>
+              Instituições eficazes, responsáveis e transparentes em todos os
+              níveis.
+            </p>
+          </div>
+          <div class="card">
+            <div class="big hl-y">16.7</div>
+            <h3>Decisão inclusiva</h3>
+            <p>
+              Tomada de decisão responsiva, inclusiva, participativa e
+              representativa.
+            </p>
+          </div>
+          <div class="card">
+            <div class="big hl-b">16.10</div>
+            <h3>Acesso à informação</h3>
+            <p>
+              Assegurar o acesso público à informação e proteger as liberdades
+              fundamentais.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="slide">
+        <div class="tag">Por que analisar dados?</div>
+        <h2>
+          Dado aberto só vira <span class="hl-g">transparência</span> quando
+          alguém sabe usá-lo.
+        </h2>
+        <ul>
+          <li>
+            O TSE publica resultados de eleições passadas em formato aberto.
+          </li>
+          <li>
+            São arquivos enormes: não dá para "ler no olho". Precisamos de
+            código.
+          </li>
+          <li>
+            Quem domina coleta, limpeza e visualização responde perguntas que
+            ninguém respondeu ainda.
+          </li>
+          <li>
+            Resultado: cidadania ativa, jornalismo de dados, políticas públicas
+            melhores.
+          </li>
+        </ul>
+      </section>
+
+      <!-- 6 -->
+      <section class="slide">
+        <div class="tag">Nossa missão técnica</div>
+        <h2>O pipeline: <span class="hl-y">da fonte ao papel</span></h2>
+        <div class="flow">
+          <div class="step">
+            <div class="ic">🌐</div>
+            <h3>Coletar</h3>
+            <p>Consumir API / baixar dados abertos do TSE</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step">
+            <div class="ic">🧹</div>
+            <h3>Tratar</h3>
+            <p>Limpar, padronizar, tipar colunas</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step">
+            <div class="ic">🧮</div>
+            <h3>Agregar</h3>
+            <p>Por ano, cargo, turno, região, UF e cidade</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step">
+            <div class="ic">📊</div>
+            <h3>Visualizar</h3>
+            <p>Dashboard e sistema de consulta</p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step">
+            <div class="ic">🖨️</div>
+            <h3>Imprimir</h3>
+            <p>Cupom na impressora térmica</p>
+          </div>
+        </div>
+        <p class="muted" style="margin-top: 3vh">
+          Já fizemos a aula da impressora: agora ela ganha dados de verdade.
+        </p>
+      </section>
+
+      <!-- 7 -->
+      <section class="slide">
+        <div class="tag">O que o sistema do grupo precisa responder</div>
+        <h2>Consultas por <span class="hl-b">qualquer recorte</span></h2>
+        <div class="grid g2">
+          <div class="card">
+            <h3 class="hl-y">Filtros</h3>
+            <span class="pill">Ano da eleição</span
+            ><span class="pill">Cargo</span><span class="pill">Turno</span>
+            <span class="pill">Brasil</span><span class="pill">Região</span
+            ><span class="pill">Estado</span><span class="pill">Município</span>
+            <span class="pill">Candidato</span><span class="pill">Partido</span>
+          </div>
+          <div class="card">
+            <h3 class="hl-g">Cálculos</h3>
+            <span class="pill">Total de votos</span
+            ><span class="pill">% sobre válidos</span>
+            <span class="pill">Brancos e nulos</span
+            ><span class="pill">Abstenção</span>
+            <span class="pill">Diferença entre turnos</span
+            ><span class="pill">Comparar anos</span
+            ><span class="pill">Ranking</span>
+          </div>
+        </div>
+        <p class="muted" style="margin-top: 3vh">
+          Quanto mais flexível o sistema, menos corrida na gincana. 😉
+        </p>
+      </section>
+
+      <!-- 8 -->
+      <section class="slide">
+        <div class="tag">O que você vai treinar</div>
+        <h2>
+          Habilidades <span class="hl-g">de quem trabalha com dados</span>
+        </h2>
+        <div class="grid g4">
+          <div class="card">
+            <div class="big">🔌</div>
+            <h3>APIs</h3>
+            <p>Requisições, parâmetros, paginação, tratamento de erro</p>
+          </div>
+          <div class="card">
+            <div class="big">🗂️</div>
+            <h3>Dados</h3>
+            <p>CSV grande, encoding, tipos, joins, agrupamentos</p>
+          </div>
+          <div class="card">
+            <div class="big">📈</div>
+            <h3>Dashboard</h3>
+            <p>Gráficos, tabelas e filtros que contam uma história</p>
+          </div>
+          <div class="card">
+            <div class="big">🧾</div>
+            <h3>Saída física</h3>
+            <p>Formatar texto para 32/48 colunas e imprimir</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="slide">
+        <div class="tag">Preparados?</div>
+        <h2>A <span class="hl-y">Gincana</span> dos Dados 🏁</h2>
+        <div class="split">
+          <ul>
+            <li>Eu peço um dado, em voz alta, sem aviso.</li>
+            <li>
+              O grupo consulta o próprio sistema e <b>imprime o cupom</b> com a
+              resposta.
+            </li>
+            <li>
+              Falta funcionalidade?
+              <span class="hl-r">Corre e implementa na hora.</span>
+            </li>
+            <li>Cupom na minha mão = ponto. Cupom certo = ponto cheio.</li>
+          </ul>
+          <div class="receipt">
+            ================================ RESULTADO TSE PRESIDENTE · 2010 ·
+            REGIÃO SUL -------------------------------- 1º TURNO ........
+            X.XXX.XXX 2º TURNO ........ X.XXX.XXX DIFERENÇA ........ +XXX.XXX
+            -------------------------------- Grupo: ______ Hora: __:__
+            ================================
+          </div>
+        </div>
+      </section>
+
+      <!-- 10 -->
+      <section class="slide">
+        <div class="tag">Exemplos de desafio</div>
+        <h2>Será que o seu sistema <span class="hl-b">aguenta?</span></h2>
+        <div class="grid g2">
+          <div class="card">
+            <h3 class="hl-g">Nível 1 · Aquecimento</h3>
+            <p>Total de votos para presidente em 2018, 1º turno, no Brasil.</p>
+          </div>
+          <div class="card">
+            <h3 class="hl-y">Nível 2 · Recorte</h3>
+            <p>Quem venceu em cada estado da região Sul no 2º turno de 2014?</p>
+          </div>
+          <div class="card">
+            <h3 class="hl-b">Nível 3 · Comparação</h3>
+            <p>
+              Diferença de votos entre 1º e 2º turno da eleição de 2010 na
+              região Sul.
+            </p>
+          </div>
+          <div class="card">
+            <h3 class="hl-r">Nível 4 · Chefão</h3>
+            <p>
+              Ranking dos 5 municípios do seu estado com maior abstenção em uma
+              eleição à escolha da banca.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="slide">
+        <div class="tag">Regras do jogo</div>
+        <h2>Como se <span class="hl-y">pontua</span></h2>
+        <table>
+          <tr>
+            <th>Critério</th>
+            <th style="text-align: right">Pontos</th>
+          </tr>
+          <tr>
+            <td>Cupom entregue com resposta correta</td>
+            <td>+10</td>
+          </tr>
+          <tr>
+            <td>Cupom legível e bem formatado (título, filtros, data/hora)</td>
+            <td>+3</td>
+          </tr>
+          <tr>
+            <td>Primeiro grupo a entregar</td>
+            <td>+2</td>
+          </tr>
+          <tr>
+            <td>Funcionalidade nova criada durante o desafio</td>
+            <td>+5</td>
+          </tr>
+          <tr>
+            <td>Resposta errada ou sem fonte do dado</td>
+            <td>0</td>
+          </tr>
+        </table>
+        <p class="muted" style="margin-top: 2.5vh">
+          Vale consultar a fonte oficial para conferir. Dado sem origem não é
+          dado, é opinião.
+        </p>
+      </section>
+
+      <!-- 12 -->
+      <section class="slide">
+        <div class="tag">Conexão com a agenda 2030</div>
+        <h2>Seu projeto toca mais que <span class="hl-y">um ODS</span></h2>
+        <div class="grid g4">
+          <div class="card">
+            <span class="ods">ODS 4</span>
+            <h3>Educação de qualidade</h3>
+            <p>Aprender dados e programação na prática.</p>
+          </div>
+          <div class="card">
+            <span class="ods">ODS 9</span>
+            <h3>Inovação</h3>
+            <p>Tecnologia a serviço de um problema real.</p>
+          </div>
+          <div class="card">
+            <span class="ods">ODS 16</span>
+            <h3>Instituições eficazes</h3>
+            <p>Transparência e acesso à informação.</p>
+          </div>
+          <div class="card">
+            <span class="ods">ODS 17</span>
+            <h3>Parcerias</h3>
+            <p>Trabalho em grupo e dados abertos compartilhados.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="slide">
+        <div class="tag">Vamos nessa</div>
+        <h1>
+          Dado bom é <span class="hl-g">dado</span><br />que chega na
+          <span class="hl-y">mão</span> de quem precisa.
+        </h1>
+        <div class="bar"></div>
+        <p class="muted">
+          Times, abram o editor. A gincana começa quando o primeiro cupom sair.
+          🖨️
+        </p>
+      </section>
+    </div>
+
+    <div class="foot">Democracia em Dados · ODS 16</div>
+    <div class="hud">
+      <span id="count">1 / 1</span>
+      <button id="prev" aria-label="Anterior">◀</button>
+      <button id="next" aria-label="Próximo">▶</button>
+      <button id="fs" aria-label="Tela cheia">⛶</button>
+    </div>
+
+    <script>
+      (function () {
+        var slides = [].slice.call(document.querySelectorAll('.slide'));
+        var i = 0;
+        var prog = document.getElementById('prog'),
+          count = document.getElementById('count');
+        function show(n) {
+          i = Math.max(0, Math.min(slides.length - 1, n));
+          slides.forEach(function (s, k) {
+            s.classList.toggle('active', k === i);
+          });
+          prog.style.width = ((i + 1) / slides.length) * 100 + '%';
+          count.textContent = i + 1 + ' / ' + slides.length;
+          try {
+            history.replaceState(null, '', '#' + (i + 1));
+          } catch (e) {}
+        }
+        var h = parseInt((location.hash || '').slice(1), 10);
+        show(isNaN(h) ? 0 : h - 1);
+        document.getElementById('prev').onclick = function () {
+          show(i - 1);
+        };
+        document.getElementById('next').onclick = function () {
+          show(i + 1);
+        };
+        document.getElementById('fs').onclick = function () {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen &&
+              document.documentElement.requestFullscreen();
+          } else {
+            document.exitFullscreen();
+          }
+        };
+        document.addEventListener('keydown', function (e) {
+          if (['ArrowRight', 'PageDown', ' ', 'Enter'].indexOf(e.key) > -1) {
+            e.preventDefault();
+            show(i + 1);
+          } else if (['ArrowLeft', 'PageUp', 'Backspace'].indexOf(e.key) > -1) {
+            e.preventDefault();
+            show(i - 1);
+          } else if (e.key === 'Home') {
+            show(0);
+          } else if (e.key === 'End') {
+            show(slides.length - 1);
+          } else if (e.key === 'f' || e.key === 'F') {
+            document.getElementById('fs').click();
+          }
+        });
+        var x0 = null;
+        document.addEventListener(
+          'touchstart',
+          function (e) {
+            x0 = e.touches[0].clientX;
+          },
+          { passive: true },
+        );
+        document.addEventListener('touchend', function (e) {
+          if (x0 === null) return;
+          var dx = e.changedTouches[0].clientX - x0;
+          if (Math.abs(dx) > 50) {
+            show(i + (dx < 0 ? 1 : -1));
+          }
+          x0 = null;
+        });
+      })();
+    </script>
+  </body>
+</html>
